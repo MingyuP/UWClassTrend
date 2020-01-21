@@ -14,7 +14,7 @@ def extract_info(university_name, professor_name):
     soup = BeautifulSoup(html, features='lxml')
     line = soup.find_all('li', class_="listing PROFESSOR")
     if len(line) == 0:
-        return 'No score found'
+        return 'No score found!'
     line = line[0].find_all('a', href=True)
     tid_url = line[0]['href']
     if tid_url is '':
