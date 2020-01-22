@@ -40,6 +40,24 @@ def generate_terms(start, end):
             term_to_generate = term_to_generate + 4
     return list_of_terms
 
+def term_to_string(val):
+    term = str(val)
+    ret = ''
+    year = 0
+    if term[0] is '0':
+        year = 1900
+    else:
+        year = 2000
+    if term[3] is '1':
+        ret = 'Winter'
+    elif term[3] is '5':
+        ret = 'Spring'
+    elif term[3] is '9':
+        ret = 'Fall'
+    year = year + int(term[1:3])
+    ret = ret + ' ' + str(year)
+    return ret
+
 def read_inputs():
     level = ''
     subject = ''
@@ -62,6 +80,9 @@ def process_requests(level, subject, coursenum):
     fall = {}
     winter = {}
     spring = {}
+    fall_last_taught = {}
+    winter_last_taught = {}
+    spring_last_taught = {}
     term = 0
     base_url = 'https://info.uwaterloo.ca/cgi-bin/cgiwrap/infocour/salook.pl?sess='
     other_url = '&level=%s&subject=%s&cournum=%s' % (level, subject, coursenum)
@@ -88,18 +109,21 @@ def process_requests(level, subject, coursenum):
                     fall[prof] = fall[prof] + 1
                 else:
                     fall[prof] = 1
+                fall_last_taught[prof] = sess
         elif term is 1:
             for prof in list_of_profs:
                 if prof in winter:
                     winter[prof] = winter[prof] + 1
                 else:
                     winter[prof] = 1
+                winter_last_taught[prof] = sess
         elif term is 2:
             for prof in list_of_profs:
                 if prof in spring:
                     spring[prof] = spring[prof] + 1
                 else:
                     spring[prof] = 1
+                spring_last_taught[prof] = sess
         else:
             print("NO")
         term = (term + 1) % 3
@@ -110,16 +134,19 @@ def process_requests(level, subject, coursenum):
         prof_split = prof.split(',')
         score = extract_info(UNI, prof_split[1] + ' ' + prof_split[0])
         print(prof + ' : ' + str(fall[prof]) + '(' + str(score) + ')')
+        print('(Last taught: ' + term_to_string(fall_last_taught[prof]) + ')')
     print('\n' + 'WINTER: ' + '\n')
     for prof in sorted(winter, key=winter.get, reverse=True):
         prof_split = prof.split(',')
         score = extract_info(UNI, prof_split[1] + ' ' + prof_split[0])
         print(prof + ' : ' + str(winter[prof]) + '(' + str(score) + ')')
+        print('(Last taught: ' + term_to_string(winter_last_taught[prof]) + ')')
     print('\n' + 'SPRING: ' + '\n')
     for prof in sorted(spring, key=spring.get, reverse=True):
         prof_split = prof.split(',')
         score = extract_info(UNI, prof_split[1] + ' ' + prof_split[0])
         print(prof + ' : ' + str(spring[prof]) + '(' + str(score) + ')')
+        print('(Last taught: ' + term_to_string(spring_last_taught[prof]) + ')')
     
 def main():
     level, subject, coursenum = read_inputs()
